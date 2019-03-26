@@ -12,3 +12,8 @@ name,cluster,role,vcpus,memory,disk,comments
 my-vm,my-cluster,Virtual Machine,2,4096,32,vmid=132
 ...
 ```
+
+Note
+----
+
+This script is just a fork from https://github.com/mrproper/proxmox-ve-api-perl/blob/master/examples/list_qemus.pl
