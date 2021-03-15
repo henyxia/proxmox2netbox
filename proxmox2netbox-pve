@@ -45,6 +45,9 @@ my $conn = PVE::APIClient::LWP->new(
     password => $password,
     host => $host,
     manual_verification => 1,
+    ssl_opts => {
+        verify_hostname => 0,
+    },
 );
 
 my $resources = $conn->get("/cluster/resources", {});
