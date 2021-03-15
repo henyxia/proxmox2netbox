@@ -1,0 +1,66 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use PVE::APIClient::LWP;
+use Getopt::Long;
+
+my $host;
+my $realm;
+my $username;
+my $password;
+my $cluster;
+my $debug;
+
+sub usage {
+    print "usage: $0 PARAMS\n";
+    print "with PARAMS:\n";
+    print "\t--host HOST\n";
+    print "\t--realm REALM (your realm: pam/pve/ldap)\n";
+    print "\t--username USERNAME\n";
+    print "\t--password PASSWORD\n";
+    print "\t--cluster CLUSTER (netbox cluster name)\n";
+    print "\t--debug (optional)\n";
+
+    exit 1;
+}
+
+GetOptions(
+    'host=s'     => \$host,
+    'realm=s'    => \$realm,
+    'username=s' => \$username,
+    'password=s' => \$password,
+    'cluster=s'  => \$cluster,
+    'debug'      => \$debug,
+) or usage();
+
+if ( !$host or !$realm or !$username or !$password or !$cluster ) {
+    usage();
+}
+
+
+my $conn = PVE::APIClient::LWP->new(
+    username => $username.'@'.$realm,
+    password => $password,
+    host => $host,
+    manual_verification => 1,
+);
+
+my $resources = $conn->get("/cluster/resources", {});
+
+foreach my $item (@$resources) {
+    next unless $item->{type} eq 'qemu';
+
+    my $ram  = $item->{maxmem} / 1024 / 1024;
+    my $disk = $item->{maxdisk} / 1024 / 1024 / 1024;
+
+    print "$item->{name},";
+    print "$cluster,";
+    print "Virtual Machine,";
+    print "$item->{maxcpu},";
+    print "$ram,";
+    print "$disk,";
+    print "vmid=$item->{vmid}";
+    print "\n";
+}
